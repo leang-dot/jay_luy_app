@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import '../models/user.dart';
+import '../state/app_state.dart';
+import '../data/local_storage.dart'; // Import storage
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  // 1. Add Controllers to capture text
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 246, 246, 246), // Pink Background
+      backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -15,8 +28,6 @@ class SignupScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 40),
-
-                // 1. TITLE
                 const Text(
                   'Create Account',
                   style: TextStyle(
@@ -26,10 +37,8 @@ class SignupScreen extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
-                
                 const SizedBox(height: 40),
 
-                // 2. THE WHITE CARD
                 Container(
                   padding: const EdgeInsets.all(24.0),
                   decoration: BoxDecoration(
@@ -46,82 +55,70 @@ class SignupScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
-                      // --- Field 1: Full Name ---
-                      Text("Full Name", style: TextStyle(color: Colors.grey[600], fontFamily: 'Poppins', fontSize: 12)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFFAFAFA),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade200),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00897B)),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
+                      // Full Name
+                      _buildLabel("Full Name"),
+                      _buildInput(_nameController, "John Doe"),
+                      const SizedBox(height: 20),
+
+                      // Email
+                      _buildLabel("Email"),
+                      _buildInput(
+                        _emailController,
+                        "example@email.com",
+                        isEmail: true,
                       ),
                       const SizedBox(height: 20),
 
-                      // --- Field 2: Email ---
-                      Text("Email", style: TextStyle(color: Colors.grey[600], fontFamily: 'Poppins', fontSize: 12)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        keyboardType: TextInputType.emailAddress, // Mobile keyboard optimization
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFFAFAFA),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade200),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00897B)),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // --- Field 3: Password ---
-                      Text("Password", style: TextStyle(color: Colors.grey[600], fontFamily: 'Poppins', fontSize: 12)),
-                      const SizedBox(height: 8),
-                      TextField(
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFFAFAFA),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade200),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Color(0xFF00897B)),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
+                      // Password
+                      _buildLabel("Password"),
+                      _buildInput(
+                        _passwordController,
+                        "••••••",
+                        isPassword: true,
                       ),
                       const SizedBox(height: 30),
 
-                      // --- SIGN UP BUTTON ---
+                      // SIGN UP BUTTON
                       Center(
                         child: SizedBox(
                           width: 140,
                           height: 48,
                           child: ElevatedButton(
-                            onPressed: () {
-                              // Navigates to Home (User successfully created!)
-                              Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                            onPressed: () async {
+                              // 2. Validation
+                              if (_nameController.text.isEmpty ||
+                                  _emailController.text.isEmpty ||
+                                  _passwordController.text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Please fill all fields"),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              // 3. Create User Object
+                              final newUser = User(
+                                fullName: _nameController.text,
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
+
+                              // 4. Save to State & Storage
+                              currentUser = newUser;
+                              await LocalStorage.saveUser(newUser);
+
+                              // 5. Navigate to Home
+                              if (context.mounted) {
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  '/home',
+                                  (route) => false,
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF00897B),
-                              elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
@@ -140,13 +137,19 @@ class SignupScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // --- BOTTOM LINK (Navigate back to Login) ---
+                      // Login Link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("Already have an account? ", style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                          Text(
+                            "Already have an account? ",
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
+                          ),
                           GestureDetector(
-                            onTap: () => Navigator.pop(context), // Go back to Login
+                            onTap: () => Navigator.pop(context),
                             child: const Text(
                               "Log In",
                               style: TextStyle(
@@ -166,6 +169,52 @@ class SignupScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Helper widgets for clean code
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.grey[600],
+          fontFamily: 'Poppins',
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInput(
+    TextEditingController controller,
+    String hint, {
+    bool isPassword = false,
+    bool isEmail = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFFFAFAFA),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF00897B)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        hintText: hint,
+        hintStyle: const TextStyle(color: Colors.black26),
       ),
     );
   }

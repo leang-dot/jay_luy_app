@@ -1,19 +1,29 @@
 import 'package:flutter/material.dart';
+import '../state/app_state.dart'; // Import to access currentUser
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get the current user data from global state
+    // If currentUser is null, use default "Guest" values
+    final String displayName = currentUser?.fullName ?? "Guest User";
+    final String displayEmail = currentUser?.email ?? "No Email";
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // 1. ADDED BACK BUTTON: Positioned on the left
+        // Back Button
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context), // Returns to the previous screen
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Profile",
@@ -26,13 +36,12 @@ class ProfileScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      // [FIX] Removed bottomNavigationBar to match your request
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 20),
-            
-            // 2. PROFILE HEADER SECTION
+
+            // 2. PROFILE HEADER SECTION (Dynamic Data)
             Center(
               child: Column(
                 children: [
@@ -53,22 +62,26 @@ class ProfileScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Image.asset(
-                        'assets/images/jayluy_logo.png', //
+                        'assets/images/jayluy_logo.png',
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    "Sorn Leang",
-                    style: TextStyle(
+
+                  // Dynamic Name
+                  Text(
+                    displayName,
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
+                  // Dynamic Email
                   Text(
-                    "sornleang@email.com",
+                    displayEmail,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       color: Colors.grey[500],
@@ -88,13 +101,33 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildProfileItem(Icons.person_outline, "Account Info"),
-                    _buildProfileItem(Icons.notifications_none, "Notifications"),
+                    _buildProfileItem(
+                      Icons.notifications_none,
+                      "Notifications",
+                    ),
                     _buildProfileItem(Icons.security, "Security"),
                     _buildProfileItem(Icons.help_outline, "Help & Support"),
                     const Spacer(),
-                    
-                    // Logout Button (Red Theme)
-                    _buildProfileItem(Icons.logout, "Logout", isLogout: true),
+
+                    // Logout Button
+                    // We wrap this in a GestureDetector to handle the logic if needed later
+                    GestureDetector(
+                      onTap: () {
+                        // Optional: Clear user state here
+                        // currentUser = null;
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/login',
+                          (route) => false,
+                        );
+                      },
+                      child: _buildProfileItem(
+                        Icons.logout,
+                        "Logout",
+                        isLogout: true,
+                      ),
+                    ),
+
                     const SizedBox(height: 40), // Extra bottom padding
                   ],
                 ),
@@ -107,7 +140,11 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Helper widget for list items
-  Widget _buildProfileItem(IconData icon, String title, {bool isLogout = false}) {
+  Widget _buildProfileItem(
+    IconData icon,
+    String title, {
+    bool isLogout = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -124,7 +161,11 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: isLogout ? Colors.red : const Color(0xFF00897B), size: 22),
+          Icon(
+            icon,
+            color: isLogout ? Colors.red : const Color(0xFF00897B),
+            size: 22,
+          ),
           const SizedBox(width: 16),
           Text(
             title,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 import '../models/transaction.dart'; 
 import '../state/app_state.dart';
+import '../data/local_storage.dart'; // Import to save data
 
 class CategoryOption {
   final String name;
@@ -21,9 +22,7 @@ class AddExpenseScreen extends StatefulWidget {
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
-  // [UPDATED] We only need this controller for the top field now
-  final TextEditingController _nameController = TextEditingController(); // Reused for the main input
-  
+  final TextEditingController _nameController = TextEditingController(); 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
@@ -125,8 +124,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       
-                      // 1. NAME FIELD (Was Category)
-                      // Now acts as the main Name input AND Category selector
+                      // 1. NAME / CATEGORY FIELD
                       _buildLabel("NAME"),
                       _buildInput(
                         controller: _nameController,
@@ -136,14 +134,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         prefixIcon: _selectedCategoryOption.icon,
                         prefixIconColor: _selectedCategoryOption.color,
                         
-                        // Dropdown arrow on the right to change Icon/Category
+                        // Dropdown arrow on the right
                         suffixWidget: PopupMenuButton<CategoryOption>(
                           icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                           onSelected: (CategoryOption value) {
                             setState(() {
                               _selectedCategoryOption = value;
-                              // Optional: If you want clicking "Food" to replace the text "Starbucks", keep this.
-                              // If you want to keep "Starbucks" but change the icon, remove this line.
                               _nameController.text = value.name; 
                             });
                           },
@@ -164,8 +160,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // [REMOVED] Old Name Field (Deleted as requested)
 
                       // 2. AMOUNT FIELD
                       _buildLabel("AMOUNT"),
@@ -216,25 +210,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           width: 160,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              // Validation
                               if (_nameController.text.isEmpty ||
                                   _amountController.text.isEmpty) {
                                 return; 
                               }
 
+                              // Create the new Transaction object
                               final newTx = Transaction(
-                                title: _nameController.text, // Uses the top field text
+                                title: _nameController.text, 
                                 amount: "-\$${_amountController.text}",
-                                icon: _selectedCategoryOption.icon, // Uses selected icon
+                                icon: _selectedCategoryOption.icon, 
                                 iconBgColor: _selectedCategoryOption.color,
                                 date: _selectedDate, 
                               );
 
+                              // 1. Update UI State (Memory)
                               setState(() {
                                 globalTransactions.insert(0, newTx);
                               });
                               
-                              // Reset
+                              // 2. Save to Local Storage (Phone Disk)
+                              await LocalStorage.saveTransactions(globalTransactions);
+                              
+                              // 3. Reset Fields
                               _nameController.clear();
                               _amountController.clear();
                               _descController.clear();
@@ -245,6 +245,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 _nameController.text = _categories[0].name;
                               });
 
+                              // 4. Notify Parent (Switch Tab to Home)
                               if (widget.onSave != null) {
                                 widget.onSave!();
                               }

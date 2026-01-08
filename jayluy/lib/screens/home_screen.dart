@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../state/app_state.dart';
+import '../state/app_state.dart'; // Make sure currentUser is defined here
 import '../models/transaction.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,17 +10,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // [REMOVED] int _selectedIndex = 0; -> MainScreen handles this now.
-
-  // This gets the first 3 items from your global list
+  // Get first 3 items from global list
   List<Transaction> get transactions => globalTransactions.take(3).toList();
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get the current user safely
+    final user = currentUser; 
+    final displayName = user?.fullName ?? "User"; // Fallback if null
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
-      // [REMOVED] bottomNavigationBar property -> MainScreen handles this now.
-      
       body: SafeArea(
         child: Column(
           children: [
@@ -41,9 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.grey[700],
                         ),
                       ),
-                      const Text(
-                        "Sorn Leang",
-                        style: TextStyle(
+                      // 2. USE DYNAMIC NAME HERE
+                      Text(
+                        displayName, 
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/transactions'), 
+                    onPressed: () => Navigator.pushNamed(context, '/transactions'),
                     child: const Text(
                       "See all",
                       style: TextStyle(
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
             // 4. DYNAMIC TRANSACTION ITEMS
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0), 
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 physics: const BouncingScrollPhysics(),
                 children: transactions.map((tx) => _buildTransactionItem(tx)).toList(),
               ),
@@ -195,12 +196,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          // Dynamic Icon & Color
           Container(
             width: 45,
             height: 45,
             decoration: BoxDecoration(
-              color: tx.iconBgColor, 
+              color: tx.iconBgColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(tx.icon, color: const Color(0xFF00897B), size: 20),
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Text(
-                  tx.timeFormatted, 
+                  tx.timeFormatted,
                   style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 11,
@@ -240,6 +240,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // [REMOVED] _buildBottomNav() function is completely deleted.
 }

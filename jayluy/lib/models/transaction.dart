@@ -5,8 +5,6 @@ class Transaction {
   final String amount;
   final IconData icon;
   final Color iconBgColor;
-  
-  // [NEW] We now store the REAL date and time
   final DateTime date; 
 
   Transaction({
@@ -17,8 +15,36 @@ class Transaction {
     required this.date,
   });
 
-  // [HELPER] This converts the real DateTime into a nice string for your UI
-  // Example output: "Today, 10:30 AM" or "Mon, 4:00 PM"
+  // --- NEW: JSON SERIALIZATION FOR LOCAL STORAGE ---
+
+  // 1. Convert Transaction object to JSON Map (Save)
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'amount': amount,
+      // We store the integer ID of the icon
+      'iconCode': icon.codePoint, 
+      // We store the integer value of the color
+      'colorValue': iconBgColor.value, 
+      'date': date.toIso8601String(),
+    };
+  }
+
+  // 2. Create Transaction object from JSON Map (Load)
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      title: json['title'],
+      amount: json['amount'],
+      // Reconstruct IconData from integer
+      icon: IconData(json['iconCode'], fontFamily: 'MaterialIcons'), 
+      // Reconstruct Color from integer
+      iconBgColor: Color(json['colorValue']),
+      date: DateTime.parse(json['date']),
+    );
+  }
+
+  // --- EXISTING HELPERS ---
+
   String get timeFormatted {
     final now = DateTime.now();
     final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
@@ -32,51 +58,34 @@ class Transaction {
     if (isToday) return "Today, $timeStr";
     if (isYesterday) return "Yesterday, $timeStr";
     
-    // Fallback for older dates: "Mon, 10:00 AM"
     List<String> weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
     String weekDay = weekDays[date.weekday - 1];
     return "$weekDay, $timeStr";
   }
 
-  // [UPDATED] Mock Data using DateTime.now() so it works dynamically!
   static List<Transaction> get mockTransactions {
     final now = DateTime.now();
-    
     return [
       Transaction(
         title: "Coffee", 
         amount: "-\$5.00", 
         icon: Icons.coffee, 
         iconBgColor: const Color(0xFFE0F2F1),
-        date: DateTime(now.year, now.month, now.day, 10, 0), // Today 10:00 AM
+        date: DateTime(now.year, now.month, now.day, 10, 0),
       ),
       Transaction(
         title: "Lunch", 
         amount: "-\$12.50", 
         icon: Icons.restaurant, 
         iconBgColor: const Color(0xFFFFF3E0),
-        date: DateTime(now.year, now.month, now.day, 13, 0), // Today 1:00 PM
+        date: DateTime(now.year, now.month, now.day, 13, 0),
       ),
       Transaction(
         title: "Transport", 
         amount: "-\$3.00", 
         icon: Icons.directions_car, 
         iconBgColor: const Color(0xFFE1F5FE),
-        date: DateTime(now.year, now.month, now.day, 17, 30), // Today 5:30 PM
-      ),
-      Transaction(
-        title: "Netflix", 
-        amount: "-\$15.99", 
-        icon: Icons.movie, 
-        iconBgColor: const Color(0xFFFCE4EC),
-        date: now.subtract(const Duration(days: 1)), // Yesterday (same time as now)
-      ),
-      Transaction(
-        title: "Groceries", 
-        amount: "-\$45.00", 
-        icon: Icons.shopping_cart, 
-        iconBgColor: const Color(0xFFF3E5F5),
-        date: now.subtract(const Duration(days: 2)), // 2 Days ago
+        date: DateTime(now.year, now.month, now.day, 17, 30),
       ),
     ];
   }
