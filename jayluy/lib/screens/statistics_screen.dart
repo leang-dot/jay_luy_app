@@ -136,7 +136,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   List<Widget> _buildDayBars() {
     final now = DateTime.now();
-    
     final currentMonday = now.subtract(Duration(days: now.weekday - 1));
 
     List<Widget> bars = [];
@@ -168,12 +167,40 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   List<Widget> _buildWeekBars() {
-    return [
-      _buildBar(50, false, "W1", "\$500"),
-      _buildBar(80, true, "W2", "\$800"),
-      _buildBar(60, false, "W3", "\$600"),
-      _buildBar(90, false, "W4", "\$900"),
-    ];
+    final now = DateTime.now();
+    List<Widget> bars = [];
+    
+    for(int i = 0; i < 4; i++) {
+      int startDay = (i * 7) + 1;
+      int endDay = (i + 1) * 7;
+      
+      int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+      if (i == 3) endDay = daysInMonth; 
+
+      double weeklyTotal = 0;
+      
+      for(int d = startDay; d <= endDay; d++) {
+        if (d > daysInMonth) break;
+        DateTime date = DateTime(now.year, now.month, d);
+        weeklyTotal += calculateDailyTotal(date);
+      }
+
+      bool isCurrentWeek = (now.day >= startDay && now.day <= endDay);
+
+      double barHeight = (weeklyTotal / 1000) * 100;
+      if (barHeight > 100) barHeight = 100;
+      if (barHeight < 5 && weeklyTotal > 0) barHeight = 10;
+
+      bars.add(
+        _buildBar(
+          barHeight, 
+          isCurrentWeek, 
+          "W${i + 1}", 
+          "\$${weeklyTotal.toStringAsFixed(0)}"
+        )
+      );
+    }
+    return bars;
   }
 
   Widget _buildBar(double height, bool isSelected, String label, String amount) {

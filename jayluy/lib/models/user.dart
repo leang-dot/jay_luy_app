@@ -2,14 +2,13 @@ class User {
   final String fullName;
   final String email;
   final String password;
-  // We won't strictly use profileImage for logic yet, but good to have in model
   final String profileImage; 
 
   User({
     required this.fullName,
     required this.email,
     required this.password,
-    this.profileImage = 'assets/images/jayluy_logo.png',
+    this.profileImage = 'assets/images/profile.png',
   });
 
   Map<String, dynamic> toJson() => {

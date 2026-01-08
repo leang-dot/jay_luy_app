@@ -135,6 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             "Already have an account? ",
                             style: TextStyle(
                               color: Colors.grey[400],
+                              fontFamily: "Poppins",
                               fontSize: 12,
                             ),
                           ),
@@ -145,6 +146,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               style: TextStyle(
                                 color: Color(0xFF00897B),
                                 fontWeight: FontWeight.bold,
+                                fontFamily: "Poppins",
                                 fontSize: 12,
                               ),
                             ),
