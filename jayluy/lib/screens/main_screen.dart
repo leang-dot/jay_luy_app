@@ -17,13 +17,12 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Define the pages (Recreated every time build runs)
     final List<Widget> pages = [
       const HomeScreen(), 
       
       AddExpenseScreen(onSave: () {
         setState(() {
-          _selectedIndex = 0; // Triggers a rebuild to show Home
+          _selectedIndex = 0;
         });
       }),
       
@@ -31,8 +30,6 @@ class _MainScreenState extends State<MainScreen> {
     ];
 
     return Scaffold(
-      // 2. [FIX] Direct Page Switching (Forces Refresh)
-      // We removed IndexedStack so the Home Screen rebuilds and calculates the new total.
       body: pages[_selectedIndex],
 
       bottomNavigationBar: Container(

@@ -13,20 +13,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // --- 1. Helper Function for Labels (Matches Signup) ---
   Widget _buildLabel(String text) {
     return Text(
       text,
       style: const TextStyle(
         fontFamily: 'Poppins',
         fontSize: 14,
-        color: Colors.grey, // Matches the grey text in the image
+        color: Colors.grey,
         fontWeight: FontWeight.w400,
       ),
     );
   }
 
-  // --- 2. Helper Function for Inputs (Matches Signup) ---
   Widget _buildInput(
     TextEditingController controller,
     String hint, {
@@ -41,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey[300], letterSpacing: isPassword ? 2 : 0),
           filled: true,
-          fillColor: const Color(0xFFF8F9FA), // Light grey fill
+          fillColor: const Color(0xFFF8F9FA),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
@@ -53,13 +51,13 @@ class _LoginScreenState extends State<LoginScreen> {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(
-              color: Color(0xFFEEEEEE), // Very subtle border
+              color: Color(0xFFEEEEEE),
               width: 1,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF00897B)), // Teal focus
+            borderSide: const BorderSide(color: Color(0xFF00897B)),
           ),
         ),
       ),
@@ -76,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              // Title
               const Text(
                 'Jay Luy',
                 style: TextStyle(
@@ -88,7 +85,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Container(
@@ -109,13 +105,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // --- Email Section using Helper ---
                       _buildLabel("Email"),
                       _buildInput(_emailController, "example@email.com"),
 
                       const SizedBox(height: 20),
 
-                      // --- Password Section using Helper ---
                       _buildLabel("Password"),
                       _buildInput(
                         _passwordController,
@@ -125,7 +119,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 30),
 
-                      // --- Log In Button ---
                       Center(
                         child: SizedBox(
                           width: 160,
@@ -176,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 20),
 
-                      // --- Footer ---
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

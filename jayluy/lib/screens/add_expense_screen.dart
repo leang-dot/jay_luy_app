@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; 
 import '../models/transaction.dart'; 
 import '../state/app_state.dart';
-import '../data/local_storage.dart'; // Import to save data
+import '../data/local_storage.dart';
 
 class CategoryOption {
   final String name;
@@ -29,7 +29,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   DateTime _selectedDate = DateTime.now();
   
-  // Track selected icon (Defaults to "Other")
   CategoryOption _selectedCategoryOption = CategoryOption(
     "Other", Icons.more_horiz, const Color(0xFFEEEEEE)
   );
@@ -48,10 +47,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   void initState() {
     super.initState();
     _dateController.text = DateFormat('EEE, d MMM y').format(_selectedDate);
-    
-    // Default start
     _selectedCategoryOption = _categories[0];
-    _nameController.text = _categories[0].name; // Pre-fill with first category
+    _nameController.text = _categories[0].name;
   }
 
   void _presentDatePicker() {
@@ -123,18 +120,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      
-                      // 1. NAME / CATEGORY FIELD
                       _buildLabel("NAME"),
                       _buildInput(
                         controller: _nameController,
                         hint: "e.g. Starbucks",
-                        
-                        // Show selected icon on the left
                         prefixIcon: _selectedCategoryOption.icon,
                         prefixIconColor: _selectedCategoryOption.color,
-                        
-                        // Dropdown arrow on the right
                         suffixWidget: PopupMenuButton<CategoryOption>(
                           icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                           onSelected: (CategoryOption value) {
@@ -160,8 +151,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // 2. AMOUNT FIELD
                       _buildLabel("AMOUNT"),
                       _buildInput(
                         controller: _amountController,
@@ -170,7 +159,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // 3. DATE FIELD
                       _buildLabel("DATE"),
                       _buildInput(
                         controller: _dateController,
@@ -181,7 +169,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // 4. DESCRIPTION FIELD
                       _buildLabel("DESCRIPTION"),
                       Container(
                         height: 100,
@@ -204,20 +191,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                       const SizedBox(height: 40),
 
-                      // 5. SAVE BUTTON
                       Center(
                         child: SizedBox(
                           width: 160,
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              // Validation
                               if (_nameController.text.isEmpty ||
                                   _amountController.text.isEmpty) {
                                 return; 
                               }
-
-                              // Create the new Transaction object
                               final newTx = Transaction(
                                 title: _nameController.text, 
                                 amount: "-\$${_amountController.text}",
@@ -226,26 +209,21 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 date: _selectedDate, 
                               );
 
-                              // 1. Update UI State (Memory)
                               setState(() {
                                 globalTransactions.insert(0, newTx);
                               });
                               
-                              // 2. Save to Local Storage (Phone Disk)
                               await LocalStorage.saveTransactions(globalTransactions);
                               
-                              // 3. Reset Fields
                               _nameController.clear();
                               _amountController.clear();
                               _descController.clear();
                               
-                              // Reset category default
                               setState(() {
                                 _selectedCategoryOption = _categories[0];
                                 _nameController.text = _categories[0].name;
                               });
-
-                              // 4. Notify Parent (Switch Tab to Home)
+                              
                               if (widget.onSave != null) {
                                 widget.onSave!();
                               }

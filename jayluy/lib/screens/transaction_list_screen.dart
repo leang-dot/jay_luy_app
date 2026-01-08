@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart'; 
-import '../state/app_state.dart'; // Import the global state
+import '../state/app_state.dart';
 
 class TransactionListScreen extends StatelessWidget {
   const TransactionListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // [FIX] Point this to globalTransactions so it shows newly added items!
     final allTransactions = globalTransactions; 
 
     return Scaffold(
@@ -44,8 +43,6 @@ class TransactionListScreen extends StatelessWidget {
       ),
     );
   }
-
-  // ... (Keep your _buildHistoryItem function exactly as it is)
 
   Widget _buildHistoryItem(Transaction tx) {
     return Container(

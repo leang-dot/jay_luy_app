@@ -4,17 +4,14 @@ import '../models/transaction.dart';
 import '../models/user.dart';
 
 class LocalStorage {
-  // Save List of Transactions
   static Future<void> saveTransactions(List<Transaction> transactions) async {
     final prefs = await SharedPreferences.getInstance();
-    // Convert List<Transaction> -> List<String> (JSON)
     final String encodedData = jsonEncode(
       transactions.map((tx) => tx.toJson()).toList(),
     );
     await prefs.setString('transactions_key', encodedData);
   }
 
-  // Load List of Transactions
   static Future<List<Transaction>> loadTransactions() async {
     final prefs = await SharedPreferences.getInstance();
     final String? encodedData = prefs.getString('transactions_key');
@@ -25,14 +22,12 @@ class LocalStorage {
     return decodedList.map((item) => Transaction.fromJson(item)).toList();
   }
 
-  // Save User
   static Future<void> saveUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
     String userJson = jsonEncode(user.toJson());
     await prefs.setString('user_key', userJson);
   }
 
-  // Load User
   static Future<User?> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString('user_key');

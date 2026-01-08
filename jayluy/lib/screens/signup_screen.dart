@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../state/app_state.dart';
-import '../data/local_storage.dart'; // Import storage
+import '../data/local_storage.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -11,7 +11,6 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  // 1. Add Controllers to capture text
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -55,12 +54,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Full Name
                       _buildLabel("Full Name"),
                       _buildInput(_nameController, "John Doe"),
                       const SizedBox(height: 20),
 
-                      // Email
                       _buildLabel("Email"),
                       _buildInput(
                         _emailController,
@@ -69,7 +66,6 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Password
                       _buildLabel("Password"),
                       _buildInput(
                         _passwordController,
@@ -78,14 +74,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       const SizedBox(height: 30),
 
-                      // SIGN UP BUTTON
                       Center(
                         child: SizedBox(
                           width: 140,
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () async {
-                              // 2. Validation
                               if (_nameController.text.isEmpty ||
                                   _emailController.text.isEmpty ||
                                   _passwordController.text.isEmpty) {
@@ -97,18 +91,15 @@ class _SignupScreenState extends State<SignupScreen> {
                                 return;
                               }
 
-                              // 3. Create User Object
                               final newUser = User(
                                 fullName: _nameController.text,
                                 email: _emailController.text,
                                 password: _passwordController.text,
                               );
 
-                              // 4. Save to State & Storage
                               currentUser = newUser;
                               await LocalStorage.saveUser(newUser);
 
-                              // 5. Navigate to Home
                               if (context.mounted) {
                                 Navigator.pushNamedAndRemoveUntil(
                                   context,
@@ -137,7 +128,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       const SizedBox(height: 20),
 
-                      // Login Link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -173,7 +163,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // Helper widgets for clean code
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),

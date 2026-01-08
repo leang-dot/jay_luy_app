@@ -12,9 +12,6 @@ class User {
     this.profileImage = 'assets/images/jayluy_logo.png',
   });
 
-  // --- JSON SERIALIZATION ---
-
-  // Convert User to JSON
   Map<String, dynamic> toJson() => {
     'fullName': fullName,
     'email': email,
@@ -22,7 +19,6 @@ class User {
     'profileImage': profileImage,
   };
 
-  // Create User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       fullName: json['fullName'],

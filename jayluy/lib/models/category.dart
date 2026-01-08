@@ -6,7 +6,6 @@ class Category {
 
   Category({required this.name, required this.icon});
 
-  // Central list of categories for the Add Expense screen
   static List<Category> get categories => [
     Category(name: "Food", icon: Icons.restaurant),
     Category(name: "Transport", icon: Icons.directions_car),

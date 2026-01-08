@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../state/app_state.dart'; // Make sure currentUser is defined here
+import '../state/app_state.dart';
 import '../models/transaction.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,21 +10,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Get first 3 items from global list
   List<Transaction> get transactions => globalTransactions.take(3).toList();
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get the current user safely
     final user = currentUser; 
-    final displayName = user?.fullName ?? "User"; // Fallback if null
+    final displayName = user?.fullName ?? "User";
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       body: SafeArea(
         child: Column(
           children: [
-            // 1. HEADER SECTION
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Row(
@@ -41,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.grey[700],
                         ),
                       ),
-                      // 2. USE DYNAMIC NAME HERE
                       Text(
                         displayName, 
                         style: const TextStyle(
@@ -79,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 10),
 
-            // 2. GRADIENT CARD
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Container(
@@ -135,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 30),
 
-            // 3. TRANSACTIONS TITLE
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Row(
@@ -164,7 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10),
 
-            // 4. DYNAMIC TRANSACTION ITEMS
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -178,7 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper for Transaction Items
   Widget _buildTransactionItem(Transaction tx) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),

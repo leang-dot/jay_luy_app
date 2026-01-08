@@ -15,35 +15,25 @@ class Transaction {
     required this.date,
   });
 
-  // --- NEW: JSON SERIALIZATION FOR LOCAL STORAGE ---
-
-  // 1. Convert Transaction object to JSON Map (Save)
   Map<String, dynamic> toJson() {
     return {
       'title': title,
       'amount': amount,
-      // We store the integer ID of the icon
       'iconCode': icon.codePoint, 
-      // We store the integer value of the color
       'colorValue': iconBgColor.value, 
       'date': date.toIso8601String(),
     };
   }
 
-  // 2. Create Transaction object from JSON Map (Load)
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
       title: json['title'],
       amount: json['amount'],
-      // Reconstruct IconData from integer
       icon: IconData(json['iconCode'], fontFamily: 'MaterialIcons'), 
-      // Reconstruct Color from integer
       iconBgColor: Color(json['colorValue']),
       date: DateTime.parse(json['date']),
     );
   }
-
-  // --- EXISTING HELPERS ---
 
   String get timeFormatted {
     final now = DateTime.now();

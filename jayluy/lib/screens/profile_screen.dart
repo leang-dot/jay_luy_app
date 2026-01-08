@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../state/app_state.dart'; // Import to access currentUser
+import '../state/app_state.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get the current user data from global state
-    // If currentUser is null, use default "Guest" values
     final String displayName = currentUser?.fullName ?? "Guest User";
     final String displayEmail = currentUser?.email ?? "No Email";
 
@@ -16,7 +14,6 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Back Button
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -41,7 +38,6 @@ class ProfileScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
 
-            // 2. PROFILE HEADER SECTION (Dynamic Data)
             Center(
               child: Column(
                 children: [
@@ -69,7 +65,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Dynamic Name
                   Text(
                     displayName,
                     style: const TextStyle(
@@ -79,7 +74,6 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Dynamic Email
                   Text(
                     displayEmail,
                     style: TextStyle(
@@ -94,7 +88,6 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // 3. SETTINGS LIST
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -109,12 +102,8 @@ class ProfileScreen extends StatelessWidget {
                     _buildProfileItem(Icons.help_outline, "Help & Support"),
                     const Spacer(),
 
-                    // Logout Button
-                    // We wrap this in a GestureDetector to handle the logic if needed later
                     GestureDetector(
                       onTap: () {
-                        // Optional: Clear user state here
-                        // currentUser = null;
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           '/login',
@@ -128,7 +117,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 40), // Extra bottom padding
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -139,7 +128,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Helper widget for list items
   Widget _buildProfileItem(
     IconData icon,
     String title, {

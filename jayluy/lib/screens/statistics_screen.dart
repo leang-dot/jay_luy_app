@@ -16,7 +16,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
-      // [REMOVED] bottomNavigationBar property -> MainScreen handles this now.
       
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -40,7 +39,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             children: [
               const SizedBox(height: 10),
 
-              // 1. TOGGLE BUTTONS (Day / Week)
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -79,7 +77,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
               const SizedBox(height: 35),
 
-              // 2. DYNAMIC CHART AREA
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -91,12 +88,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   children: [
                     const SizedBox(height: 10), 
                     
-                    // Chart Bars with Real Amounts
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: _selectedFilter == "Day" 
-                        ? _buildDayBars() // This is now SMART
+                        ? _buildDayBars()
                         : _buildWeekBars(),
                     ),
                   ],
@@ -105,7 +101,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
               const SizedBox(height: 30),
 
-              // 3. TOP CATEGORIES (Dynamic)
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -124,7 +119,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      // These update automatically when you add transactions!
                       _buildCategoryItem("Food & Drinks", "\$${calculateTotalExpenses(category: 'Food').toStringAsFixed(2)}", Icons.restaurant, 0.7),
                       _buildCategoryItem("Transport", "\$${calculateTotalExpenses(category: 'Transport').toStringAsFixed(2)}", Icons.directions_car, 0.3),
                       _buildCategoryItem("Shopping", "\$${calculateTotalExpenses(category: 'Shopping').toStringAsFixed(2)}", Icons.shopping_bag, 0.9),
@@ -140,48 +134,39 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  // --- LOGIC: THE SMART BAR BUILDER ---
-
   List<Widget> _buildDayBars() {
     final now = DateTime.now();
     
-    // 1. Find the Monday of the current week
     final currentMonday = now.subtract(Duration(days: now.weekday - 1));
 
     List<Widget> bars = [];
     List<String> labels = ["M", "T", "W", "T", "F", "S", "S"];
 
-    // 2. Loop 7 times to create bars for Mon-Sun
     for (int i = 0; i < 7; i++) {
       DateTime barDate = currentMonday.add(Duration(days: i));
       
-      // 3. Get REAL money from app_state
       double dailyAmount = calculateDailyTotal(barDate);
       
-      // 4. Determine Highlight (Is this bar Today?)
       bool isToday = barDate.year == now.year && 
                      barDate.month == now.month && 
                      barDate.day == now.day;
 
-      // 5. Calculate Height relative to a target (e.g., $200 is full bar)
       double barHeight = (dailyAmount / 200) * 100;
-      if (barHeight > 100) barHeight = 100; // Max height cap
-      if (barHeight < 5 && dailyAmount > 0) barHeight = 10; // Min height so we see it
+      if (barHeight > 100) barHeight = 100;
+      if (barHeight < 5 && dailyAmount > 0) barHeight = 10;
 
-      // 6. Add to list
       bars.add(
         _buildBar(
           barHeight, 
           isToday, 
           labels[i], 
-          "\$${dailyAmount.toStringAsFixed(0)}" // Shows "$50"
+          "\$${dailyAmount.toStringAsFixed(0)}"
         )
       );
     }
     return bars;
   }
 
-  // Placeholder for weeks (Static for now until we add week logic)
   List<Widget> _buildWeekBars() {
     return [
       _buildBar(50, false, "W1", "\$500"),
@@ -261,6 +246,4 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
     );
   }
-
-  // [REMOVED] _buildBottomNav() function is completely deleted.
 }
