@@ -57,13 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 48,
                       height: 48,
                       decoration: const BoxDecoration(
-                        color: Colors.white,
+                        color: Color.fromARGB(255, 0, 0, 0),
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Image.asset(
-                          'assets/images/jayluy_logo.png',
+                          'assets/images/profile.png',
                           fit: BoxFit.contain,
                         ),
                       ),

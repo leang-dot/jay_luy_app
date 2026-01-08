@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -58,7 +58,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Image.asset(
-                        'assets/images/jayluy_logo.png',
+                        'assets/images/profile.png',
                         fit: BoxFit.contain,
                       ),
                     ),

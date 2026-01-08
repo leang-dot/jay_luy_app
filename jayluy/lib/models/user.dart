@@ -23,7 +23,7 @@ class User {
       fullName: json['fullName'],
       email: json['email'],
       password: json['password'],
-      profileImage: json['profileImage'] ?? 'assets/images/jayluy_logo.png',
+      profileImage: json['profileImage'] ?? 'assets/images/profile.png',
     );
   }
 }
