@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  @override
   Widget build(BuildContext context) {
-    final String displayName = currentUser?.fullName ?? "Guest User";
-    final String displayEmail = currentUser?.email ?? "No Email";
+    final user = context.watch<AppState>().currentUser;
+
+    final displayName = user?.fullName ?? "Guest User";
+    final displayEmail = user?.email ?? "No Email";
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
@@ -109,6 +107,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                     GestureDetector(
                       onTap: () {
+                        context.read<AppState>().logout();
+
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           '/login',

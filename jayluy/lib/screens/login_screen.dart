@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../data/local_storage.dart';
 import '../state/app_state.dart';
 
@@ -37,7 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
         obscureText: isPassword,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey[300], letterSpacing: isPassword ? 2 : 0),
+          hintStyle: TextStyle(
+            color: Colors.grey[300],
+            letterSpacing: isPassword ? 2 : 0,
+          ),
           filled: true,
           fillColor: const Color(0xFFF8F9FA),
           contentPadding: const EdgeInsets.symmetric(
@@ -50,10 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Color(0xFFEEEEEE),
-              width: 1,
-            ),
+            borderSide: const BorderSide(color: Color(0xFFEEEEEE), width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -89,7 +90,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 40,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
@@ -125,13 +129,33 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () async {
-                              final savedUser = await LocalStorage.loadUser();
+                              final inputEmail = _emailController.text
+                                  .trim()
+                                  .toLowerCase();
+                              final inputPassword = _passwordController.text
+                                  .trim();
+                              final existingUser =
+                                  await LocalStorage.getUserByEmail(inputEmail);
 
-                              if (savedUser != null &&
-                                  savedUser.email == _emailController.text &&
-                                  savedUser.password == _passwordController.text) {
-                                currentUser = savedUser;
+                              if (existingUser == null) {
                                 if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Account does not exist. Please sign up.",
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return;
+                              }
+
+                              if (existingUser.password == inputPassword) {
+                                if (context.mounted) {
+                                  context.read<AppState>().loginUser(
+                                    existingUser,
+                                  );
+
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,
                                     '/home',
@@ -142,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Invalid email or password"),
+                                      content: Text("Incorrect Password"),
                                     ),
                                   );
                                 }
@@ -181,7 +205,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/signup'),
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/signup'),
                             child: const Text(
                               "Sign Up",
                               style: TextStyle(

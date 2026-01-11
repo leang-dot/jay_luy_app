@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 import '../models/transaction.dart';
 
@@ -10,12 +11,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Transaction> get transactions => globalTransactions.take(3).toList();
 
   @override
   Widget build(BuildContext context) {
-    final user = currentUser; 
+    final appState = context.watch<AppState>();
+    
+    // Get data from AppState
+    final transactions = appState.transactions.take(3).toList();
+    final user = appState.currentUser; 
     final displayName = user?.fullName ?? "User";
+    final totalExpenses = appState.calculateTotalExpenses();
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
@@ -115,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "\$${calculateTotalExpenses().toStringAsFixed(2)}",
+                      "\$${totalExpenses.toStringAsFixed(2)}",
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         color: Colors.white,

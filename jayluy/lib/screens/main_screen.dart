@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'home_screen.dart';
 import 'add_expense_screen.dart';
 import 'statistics_screen.dart';
-import 'welcome_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

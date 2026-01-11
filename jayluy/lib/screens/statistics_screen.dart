@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../state/app_state.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -9,14 +10,42 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  String _selectedFilter = "Day"; 
+  String _selectedFilter = "Day";
   final List<String> _periodFilters = ["Day", "Week"];
+  final List<String> _categoryNames = [
+    "Food",
+    "Shopping",
+    "Transport",
+    "Bills",
+    "Entertainment",
+    "Health",
+    "Other",
+  ];
 
   @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+
+    List<Map<String, dynamic>> categoryData = [];
+
+    for (var cat in _categoryNames) {
+      double total = appState.calculateTotalExpenses(category: cat);
+      if (total > 0) {
+        categoryData.add({
+          "name": cat == "Food" ? "Food & Drinks" : cat,
+          "amount": total,
+          "icon": _getCategoryIcon(cat),
+          "color": _getCategoryColor(cat),
+        });
+      }
+    }
+
+    categoryData.sort((a, b) => b["amount"].compareTo(a["amount"]));
+
+    final top3Categories = categoryData.take(3).toList();
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
-      
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -56,9 +85,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF00897B) : Colors.transparent,
+                          color: isSelected
+                              ? const Color(0xFF00897B)
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -79,21 +113,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Column(
                   children: [
-                    const SizedBox(height: 10), 
-                    
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      children: _selectedFilter == "Day" 
-                        ? _buildDayBars()
-                        : _buildWeekBars(),
+                      children: _selectedFilter == "Day"
+                          ? _buildDayBars(appState)
+                          : _buildWeekBars(appState),
                     ),
                   ],
                 ),
@@ -118,12 +154,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
-                    children: [
-                      _buildCategoryItem("Food & Drinks", "\$${calculateTotalExpenses(category: 'Food').toStringAsFixed(2)}", Icons.restaurant, 0.7),
-                      _buildCategoryItem("Transport", "\$${calculateTotalExpenses(category: 'Transport').toStringAsFixed(2)}", Icons.directions_car, 0.3),
-                      _buildCategoryItem("Shopping", "\$${calculateTotalExpenses(category: 'Shopping').toStringAsFixed(2)}", Icons.shopping_bag, 0.9),
-                      const SizedBox(height: 20),
-                    ],
+                    children: top3Categories.map((data) {
+                      return _buildCategoryCard(
+                        data['name'],
+                        data['amount'],
+                        data['icon'],
+                        data['color'],
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
@@ -134,21 +172,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  List<Widget> _buildDayBars() {
+  List<Widget> _buildDayBars(AppState appState) {
     final now = DateTime.now();
     final currentMonday = now.subtract(Duration(days: now.weekday - 1));
-
     List<Widget> bars = [];
     List<String> labels = ["M", "T", "W", "T", "F", "S", "S"];
 
     for (int i = 0; i < 7; i++) {
       DateTime barDate = currentMonday.add(Duration(days: i));
-      
-      double dailyAmount = calculateDailyTotal(barDate);
-      
-      bool isToday = barDate.year == now.year && 
-                     barDate.month == now.month && 
-                     barDate.day == now.day;
+      double dailyAmount = appState.calculateDailyTotal(barDate);
+      bool isToday =
+          barDate.year == now.year &&
+          barDate.month == now.month &&
+          barDate.day == now.day;
 
       double barHeight = (dailyAmount / 200) * 100;
       if (barHeight > 100) barHeight = 100;
@@ -156,54 +192,56 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
       bars.add(
         _buildBar(
-          barHeight, 
-          isToday, 
-          labels[i], 
-          "\$${dailyAmount.toStringAsFixed(0)}"
-        )
+          barHeight,
+          isToday,
+          labels[i],
+          "\$${dailyAmount.toStringAsFixed(0)}",
+        ),
       );
     }
     return bars;
   }
 
-  List<Widget> _buildWeekBars() {
+  List<Widget> _buildWeekBars(AppState appState) {
     final now = DateTime.now();
     List<Widget> bars = [];
-    
-    for(int i = 0; i < 4; i++) {
+
+    for (int i = 0; i < 4; i++) {
       int startDay = (i * 7) + 1;
       int endDay = (i + 1) * 7;
-      
       int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-      if (i == 3) endDay = daysInMonth; 
+      if (i == 3) endDay = daysInMonth;
 
       double weeklyTotal = 0;
-      
-      for(int d = startDay; d <= endDay; d++) {
+      for (int d = startDay; d <= endDay; d++) {
         if (d > daysInMonth) break;
         DateTime date = DateTime(now.year, now.month, d);
-        weeklyTotal += calculateDailyTotal(date);
+        weeklyTotal += appState.calculateDailyTotal(date);
       }
 
       bool isCurrentWeek = (now.day >= startDay && now.day <= endDay);
-
       double barHeight = (weeklyTotal / 1000) * 100;
       if (barHeight > 100) barHeight = 100;
       if (barHeight < 5 && weeklyTotal > 0) barHeight = 10;
 
       bars.add(
         _buildBar(
-          barHeight, 
-          isCurrentWeek, 
-          "W${i + 1}", 
-          "\$${weeklyTotal.toStringAsFixed(0)}"
-        )
+          barHeight,
+          isCurrentWeek,
+          "W${i + 1}",
+          "\$${weeklyTotal.toStringAsFixed(0)}",
+        ),
       );
     }
     return bars;
   }
 
-  Widget _buildBar(double height, bool isSelected, String label, String amount) {
+  Widget _buildBar(
+    double height,
+    bool isSelected,
+    String label,
+    String amount,
+  ) {
     return Column(
       children: [
         Text(
@@ -217,7 +255,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ),
         const SizedBox(height: 6),
         Container(
-          width: 15, 
+          width: 15,
           height: 100,
           decoration: BoxDecoration(
             color: const Color(0xFF00897B).withOpacity(0.15),
@@ -228,7 +266,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             alignment: Alignment.bottomCenter,
             child: Container(
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF00897B) : const Color(0xFF00897B).withOpacity(0.4),
+                gradient: isSelected || height > 10
+                    ? const LinearGradient(
+                        colors: [
+                          Color(0xFF00897B),
+                          Color.fromARGB(255, 0, 255, 229),
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      )
+                    : null,
+                color: (isSelected || height > 10)
+                    ? null
+                    : const Color(0xFF00897B).withOpacity(0.4),
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -240,37 +290,79 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildCategoryItem(String title, String amount, IconData icon, double progress) {
+  Widget _buildCategoryCard(
+    String title,
+    double amount,
+    IconData icon,
+    Color iconBg,
+  ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color(0xFF00897B)),
-          const SizedBox(width: 16),
+          Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFF00897B), size: 20),
+          ),
+          const SizedBox(width: 20),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey[100],
-                  color: const Color(0xFF00897B),
-                  minHeight: 6,
-                ),
-              ],
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                fontSize: 16,
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          Text(
+            "-\$${amount.toStringAsFixed(2)}",
+            style: const TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    if (category.contains("Food")) return Icons.restaurant;
+    if (category.contains("Shopping")) return Icons.shopping_bag;
+    if (category.contains("Transport")) return Icons.directions_car;
+    if (category.contains("Bills")) return Icons.receipt_long;
+    if (category.contains("Entertainment")) return Icons.movie;
+    if (category.contains("Health")) return Icons.local_hospital;
+    return Icons.more_horiz;
+  }
+
+  Color _getCategoryColor(String category) {
+    if (category.contains("Food")) return const Color(0xFFE0F2F1);
+    if (category.contains("Shopping")) return const Color(0xFFF3E5F5);
+    if (category.contains("Transport")) return const Color(0xFFE1F5FE);
+    if (category.contains("Bills")) return const Color(0xFFFFF3E0);
+    if (category.contains("Entertainment")) return const Color(0xFFFCE4EC);
+    if (category.contains("Health")) return const Color(0xFFFFEBEE);
+    return const Color(0xFFEEEEEE);
   }
 }

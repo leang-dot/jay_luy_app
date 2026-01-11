@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/transaction.dart'; 
+import 'package:provider/provider.dart';
+import '../models/transaction.dart';
 import '../state/app_state.dart';
 
 class TransactionListScreen extends StatelessWidget {
@@ -7,7 +8,7 @@ class TransactionListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allTransactions = globalTransactions; 
+    final allTransactions = context.watch<AppState>().transactions;
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
@@ -85,7 +86,7 @@ class TransactionListScreen extends StatelessWidget {
                 ),
                 Text(
                   tx.timeFormatted,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 12,
                     fontFamily: 'Poppins',

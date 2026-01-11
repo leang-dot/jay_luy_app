@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../state/app_state.dart';
 import '../data/local_storage.dart';
@@ -93,14 +94,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
                               final newUser = User(
                                 fullName: _nameController.text,
-                                email: _emailController.text,
+                                email: _emailController.text
+                                    .trim()
+                                    .toLowerCase(),
                                 password: _passwordController.text,
                               );
 
-                              currentUser = newUser;
-                              await LocalStorage.saveUser(newUser);
+                              await LocalStorage.registerUser(newUser);
 
                               if (context.mounted) {
+                                context.read<AppState>().loginUser(newUser);
+
                                 Navigator.pushNamedAndRemoveUntil(
                                   context,
                                   '/home',

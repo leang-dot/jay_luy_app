@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/main_screen.dart';
 import 'screens/transaction_list_screen.dart';
 import 'screens/profile_screen.dart';
@@ -6,22 +7,19 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/welcome_screen.dart';
 import 'state/app_state.dart';
-import 'data/local_storage.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  final appState = AppState();
+  await appState.loadInitialData();
 
-  List<dynamic> loadedTransactions = await LocalStorage.loadTransactions();
-  if (loadedTransactions.isNotEmpty) {
-    globalTransactions = loadedTransactions.cast<dynamic>().map((e) => e as dynamic).toList().cast();
-    globalTransactions = await LocalStorage.loadTransactions();
-  } else {
-    globalTransactions = [];
-  }
-
-  currentUser = await LocalStorage.loadUser();
-
-  runApp(const JayLuyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => appState,
+      child: const JayLuyApp(),
+    ),
+  );
 }
 
 class JayLuyApp extends StatelessWidget {
@@ -29,13 +27,14 @@ class JayLuyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AppState>().currentUser;
+    final isWelcome = user == null;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Jay Luy',
       theme: ThemeData(primarySwatch: Colors.teal),
-
-      home: const WelcomeScreen(), 
-
+      home: isWelcome ? const WelcomeScreen() : const MainScreen(),
       routes: {
         '/home': (context) => const MainScreen(),
         '/transactions': (context) => const TransactionListScreen(),
