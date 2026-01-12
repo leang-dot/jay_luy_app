@@ -12,5 +12,7 @@ class Category {
     Category(name: "Shopping", icon: Icons.shopping_bag),
     Category(name: "Entertainment", icon: Icons.movie),
     Category(name: "Bills", icon: Icons.receipt_long),
+    Category(name: "Health", icon: Icons.local_hospital),
+    Category(name: "Other", icon: Icons.more_horiz),
   ];
 }

@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction.dart';
-
-class CategoryOption {
-  final String name;
-  final IconData icon;
-  final Color color;
-
-  CategoryOption(this.name, this.icon, this.color);
-}
+import '../models/category.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   final Function(Transaction) onSave;
@@ -27,24 +20,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  late CategoryOption _selectedCategoryOption;
+  late Category _selectedCategory;
 
-  final List<CategoryOption> _categories = [
-    CategoryOption("Food & Drinks", Icons.restaurant, const Color(0xFFE0F2F1)),
-    CategoryOption("Shopping", Icons.shopping_bag, const Color(0xFFF3E5F5)),
-    CategoryOption("Transport", Icons.directions_car, const Color(0xFFE1F5FE)),
-    CategoryOption("Bills", Icons.receipt_long, const Color(0xFFFFF3E0)),
-    CategoryOption("Entertainment", Icons.movie, const Color(0xFFFCE4EC)),
-    CategoryOption("Health", Icons.local_hospital, const Color(0xFFFFEBEE)),
-    CategoryOption("Other", Icons.more_horiz, const Color(0xFFEEEEEE)),
-  ];
+  final List<Category> _availableCategories = Category.categories;
 
   @override
   void initState() {
     super.initState();
+    // Logic: Initialize UI state
     _dateController.text = DateFormat('EEE, d MMM y').format(_selectedDate);
-    _selectedCategoryOption = _categories[0];
-    _nameController.text = _categories[0].name;
+    _selectedCategory = _availableCategories[0];
+    _nameController.text = _availableCategories[0].name;
   }
 
   void _presentDatePicker() {
@@ -120,22 +106,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       _buildInput(
                         controller: _nameController,
                         hint: "e.g. Starbucks",
-                        prefixIcon: _selectedCategoryOption.icon,
-                        prefixIconColor: _selectedCategoryOption.color,
-                        suffixWidget: PopupMenuButton<CategoryOption>(
+                        prefixIcon: _selectedCategory.icon,
+                        prefixIconColor: const Color(0xFFE0F2F1),
+                        suffixWidget: PopupMenuButton<Category>(
                           icon: const Icon(
                             Icons.arrow_drop_down,
                             color: Colors.grey,
                           ),
-                          onSelected: (CategoryOption value) {
+                          onSelected: (Category value) {
                             setState(() {
-                              _selectedCategoryOption = value;
+                              _selectedCategory = value;
                               _nameController.text = value.name;
                             });
                           },
                           itemBuilder: (BuildContext context) {
-                            return _categories.map((CategoryOption choice) {
-                              return PopupMenuItem<CategoryOption>(
+                            return _availableCategories.map((Category choice) {
+                              return PopupMenuItem<Category>(
                                 value: choice,
                                 child: Row(
                                   children: [
@@ -212,8 +198,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               final newTx = Transaction(
                                 title: _nameController.text,
                                 amount: "-\$${_amountController.text}",
-                                icon: _selectedCategoryOption.icon,
-                                iconBgColor: _selectedCategoryOption.color,
+                                icon: _selectedCategory.icon,
+                                iconBgColor: const Color(0xFFE0F2F1),
                                 date: _selectedDate,
                               );
 

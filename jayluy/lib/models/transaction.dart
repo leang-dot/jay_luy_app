@@ -52,31 +52,4 @@ class Transaction {
     String weekDay = weekDays[date.weekday - 1];
     return "$weekDay, $timeStr";
   }
-
-  static List<Transaction> get mockTransactions {
-    final now = DateTime.now();
-    return [
-      Transaction(
-        title: "Coffee", 
-        amount: "-\$5.00", 
-        icon: Icons.coffee, 
-        iconBgColor: const Color(0xFFE0F2F1),
-        date: DateTime(now.year, now.month, now.day, 10, 0),
-      ),
-      Transaction(
-        title: "Lunch", 
-        amount: "-\$12.50", 
-        icon: Icons.restaurant, 
-        iconBgColor: const Color(0xFFFFF3E0),
-        date: DateTime(now.year, now.month, now.day, 13, 0),
-      ),
-      Transaction(
-        title: "Transport", 
-        amount: "-\$3.00", 
-        icon: Icons.directions_car, 
-        iconBgColor: const Color(0xFFE1F5FE),
-        date: DateTime(now.year, now.month, now.day, 17, 30),
-      ),
-    ];
-  }
 }
