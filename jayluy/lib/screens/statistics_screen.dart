@@ -13,6 +13,7 @@ class StatisticsScreen extends StatefulWidget {
 class _StatisticsScreenState extends State<StatisticsScreen> {
   String _selectedFilter = "Day";
   final List<String> _periodFilters = ["Day", "Week"];
+
   final List<String> _categoryNames = [
     "Food",
     "Shopping",

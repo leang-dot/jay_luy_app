@@ -11,7 +11,6 @@ class CategoryOption {
 }
 
 class AddExpenseScreen extends StatefulWidget {
-  // NEW: Instead of Provider, we use a required callback function
   final Function(Transaction) onSave;
 
   const AddExpenseScreen({super.key, required this.onSave});
@@ -210,7 +209,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 return;
                               }
 
-                              // CREATE DATA MODEL
                               final newTx = Transaction(
                                 title: _nameController.text,
                                 amount: "-\$${_amountController.text}",

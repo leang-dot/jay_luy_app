@@ -26,6 +26,7 @@ class JayLuyApp extends StatelessWidget {
           ? const WelcomeScreen()
           : MainScreen(currentUser: initialUser!),
       routes: {
+        '/home': (context) => const WelcomeScreen(),
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
       },

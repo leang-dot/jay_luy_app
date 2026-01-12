@@ -202,14 +202,22 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  tx.amount,
+                  tx.timeFormatted,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: Colors.grey,
                   ),
                 ),
               ],
+            ),
+          ),
+          Text(
+            tx.amount,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],

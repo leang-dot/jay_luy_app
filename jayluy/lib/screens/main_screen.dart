@@ -44,6 +44,7 @@ class _MainScreenState extends State<MainScreen> {
 
   void _handleLogout() async {
     await LocalStorage.clearUser();
+
     if (mounted) {
       Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
     }
@@ -69,8 +70,7 @@ class _MainScreenState extends State<MainScreen> {
         children: pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        type:
-            BottomNavigationBarType.fixed,
+        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
