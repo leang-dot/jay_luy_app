@@ -27,7 +27,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    // Logic: Initialize UI state
     _dateController.text = DateFormat('EEE, d MMM y').format(_selectedDate);
     _selectedCategory = _availableCategories[0];
     _nameController.text = _availableCategories[0].name;
