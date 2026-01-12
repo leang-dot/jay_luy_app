@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../state/app_state.dart';
+import '../models/user.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final User currentUser;
+  final VoidCallback onLogout;
+
+  const ProfileScreen({
+    super.key,
+    required this.currentUser,
+    required this.onLogout,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AppState>().currentUser;
-
-    final displayName = user?.fullName ?? "Guest User";
-    final displayEmail = user?.email ?? "No Email";
+    final displayName = currentUser.fullName;
+    final displayEmail = currentUser.email;
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading:
+            false,
         title: const Text(
           "Profile",
           style: TextStyle(
@@ -58,12 +56,9 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Image.asset(
-                        'assets/images/profile.png',
-                        fit: BoxFit.contain,
-                      ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Icon(Icons.person, color: Colors.white, size: 50),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -103,18 +98,12 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     _buildProfileItem(Icons.security, "Security"),
                     _buildProfileItem(Icons.help_outline, "Help & Support"),
+
                     const Spacer(),
 
                     GestureDetector(
-                      onTap: () {
-                        context.read<AppState>().logout();
-
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/login',
-                          (route) => false,
-                        );
-                      },
+                      onTap:
+                          onLogout,
                       child: _buildProfileItem(
                         Icons.logout,
                         "Logout",

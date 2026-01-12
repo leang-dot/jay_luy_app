@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../state/app_state.dart';
+import '../models/transaction.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key});
+  final List<Transaction> transactions;
+
+  const StatisticsScreen({super.key, required this.transactions});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
@@ -22,14 +23,35 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     "Other",
   ];
 
+  double _calculateCategoryTotal(String category) {
+    double total = 0;
+    for (var tx in widget.transactions) {
+      if (tx.title.toLowerCase().contains(category.toLowerCase())) {
+        String cleanAmount = tx.amount.replaceAll(RegExp(r'[^\d.]'), '');
+        total += double.tryParse(cleanAmount) ?? 0;
+      }
+    }
+    return total;
+  }
+
+  double _calculateDailyTotal(DateTime date) {
+    double total = 0;
+    for (var tx in widget.transactions) {
+      if (tx.date.year == date.year &&
+          tx.date.month == date.month &&
+          tx.date.day == date.day) {
+        String cleanAmount = tx.amount.replaceAll(RegExp(r'[^\d.]'), '');
+        total += double.tryParse(cleanAmount) ?? 0;
+      }
+    }
+    return total;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
-
     List<Map<String, dynamic>> categoryData = [];
-
     for (var cat in _categoryNames) {
-      double total = appState.calculateTotalExpenses(category: cat);
+      double total = _calculateCategoryTotal(cat);
       if (total > 0) {
         categoryData.add({
           "name": cat == "Food" ? "Food & Drinks" : cat,
@@ -41,7 +63,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     categoryData.sort((a, b) => b["amount"].compareTo(a["amount"]));
-
     final top3Categories = categoryData.take(3).toList();
 
     return Scaffold(
@@ -66,8 +87,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             children: [
-              const SizedBox(height: 10),
-
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -78,11 +97,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   children: _periodFilters.map((period) {
                     bool isSelected = _selectedFilter == period;
                     return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedFilter = period;
-                        });
-                      },
+                      onTap: () => setState(() => _selectedFilter = period),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(
@@ -121,17 +136,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: _selectedFilter == "Day"
-                          ? _buildDayBars(appState)
-                          : _buildWeekBars(appState),
-                    ),
-                  ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: _selectedFilter == "Day"
+                      ? _buildDayBars()
+                      : _buildWeekBars(),
                 ),
               ),
 
@@ -172,7 +182,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  List<Widget> _buildDayBars(AppState appState) {
+  List<Widget> _buildDayBars() {
     final now = DateTime.now();
     final currentMonday = now.subtract(Duration(days: now.weekday - 1));
     List<Widget> bars = [];
@@ -180,7 +190,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     for (int i = 0; i < 7; i++) {
       DateTime barDate = currentMonday.add(Duration(days: i));
-      double dailyAmount = appState.calculateDailyTotal(barDate);
+      double dailyAmount = _calculateDailyTotal(barDate);
       bool isToday =
           barDate.year == now.year &&
           barDate.month == now.month &&
@@ -202,32 +212,22 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return bars;
   }
 
-  List<Widget> _buildWeekBars(AppState appState) {
+  List<Widget> _buildWeekBars() {
     final now = DateTime.now();
     List<Widget> bars = [];
-
     for (int i = 0; i < 4; i++) {
       int startDay = (i * 7) + 1;
       int endDay = (i + 1) * 7;
-      int daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-      if (i == 3) endDay = daysInMonth;
-
       double weeklyTotal = 0;
       for (int d = startDay; d <= endDay; d++) {
-        if (d > daysInMonth) break;
         DateTime date = DateTime(now.year, now.month, d);
-        weeklyTotal += appState.calculateDailyTotal(date);
+        weeklyTotal += _calculateDailyTotal(date);
       }
-
-      bool isCurrentWeek = (now.day >= startDay && now.day <= endDay);
       double barHeight = (weeklyTotal / 1000) * 100;
-      if (barHeight > 100) barHeight = 100;
-      if (barHeight < 5 && weeklyTotal > 0) barHeight = 10;
-
       bars.add(
         _buildBar(
           barHeight,
-          isCurrentWeek,
+          (now.day >= startDay && now.day <= endDay),
           "W${i + 1}",
           "\$${weeklyTotal.toStringAsFixed(0)}",
         ),
@@ -276,7 +276,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         end: Alignment.topCenter,
                       )
                     : null,
-                color: (isSelected || height > 10)
+                color: isSelected || height > 10
                     ? null
                     : const Color(0xFF00897B).withOpacity(0.4),
                 borderRadius: BorderRadius.circular(10),

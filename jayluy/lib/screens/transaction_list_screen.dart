@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/transaction.dart';
-import '../state/app_state.dart';
 
 class TransactionListScreen extends StatelessWidget {
-  const TransactionListScreen({super.key});
+  final List<Transaction> transactions;
+
+  const TransactionListScreen({super.key, required this.transactions});
 
   @override
   Widget build(BuildContext context) {
-    final allTransactions = context.watch<AppState>().transactions;
+    final allTransactions = transactions;
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
@@ -34,14 +34,21 @@ class TransactionListScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(24.0),
-        itemCount: allTransactions.length,
-        itemBuilder: (context, index) {
-          final tx = allTransactions[index];
-          return _buildHistoryItem(tx);
-        },
-      ),
+      body: allTransactions.isEmpty
+          ? const Center(
+              child: Text(
+                "No transactions yet",
+                style: TextStyle(fontFamily: 'Poppins', color: Colors.grey),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(24.0),
+              itemCount: allTransactions.length,
+              itemBuilder: (context, index) {
+                final tx = allTransactions[index];
+                return _buildHistoryItem(tx);
+              },
+            ),
     );
   }
 

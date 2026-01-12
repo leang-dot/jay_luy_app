@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../state/app_state.dart';
+import 'transaction_list_screen.dart';
 import '../models/transaction.dart';
+import '../models/user.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  final User currentUser;
+  final List<Transaction> transactions;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
+  const HomeScreen({
+    super.key,
+    required this.currentUser,
+    required this.transactions,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final appState = context.watch<AppState>();
-    
-    // Get data from AppState
-    final transactions = appState.transactions.take(3).toList();
-    final user = appState.currentUser; 
-    final displayName = user?.fullName ?? "User";
-    final totalExpenses = appState.calculateTotalExpenses();
+    double totalExpenses = transactions.fold(0.0, (sum, item) {
+      String cleanAmount = item.amount.replaceAll(RegExp(r'[^\d.]'), '');
+      return sum + (double.tryParse(cleanAmount) ?? 0.0);
+    });
+
+    final recentTransactions = transactions.take(3).toList();
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
@@ -35,81 +35,49 @@ class _HomeScreenState extends State<HomeScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Hello",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: Colors.grey,
                         ),
                       ),
                       Text(
-                        displayName, 
+                        currentUser.fullName,
                         style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
                     ],
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/profile');
-                    },
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset(
-                          'assets/images/profile.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
+                  const CircleAvatar(
+                    backgroundColor: Colors.black,
+                    radius: 24,
+                    child: Icon(Icons.person, color: Colors.white),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 10),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Container(
                 width: double.infinity,
-                height: 200,
                 padding: const EdgeInsets.all(30.0),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFF00897B),
-                      Color.fromARGB(255, 0, 255, 229),
-                    ],
+                    colors: [Color(0xFF00897B), Color(0xFF00BFA5)],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
                   borderRadius: BorderRadius.circular(32),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF00897B).withOpacity(0.25),
-                      blurRadius: 25,
-                      offset: const Offset(0, 10),
-                      spreadRadius: -5,
-                    ),
-                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 10),
                     const Text(
                       "Total Expenses",
                       style: TextStyle(
@@ -141,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Transactions History",
+                    "Recent Activity",
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 18,
@@ -149,7 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/transactions'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TransactionListScreen(transactions: transactions),
+                        ),
+                      );
+                    },
                     child: const Text(
                       "See all",
                       style: TextStyle(
@@ -161,14 +137,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
 
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                physics: const BouncingScrollPhysics(),
-                children: transactions.map((tx) => _buildTransactionItem(tx)).toList(),
-              ),
+              child: recentTransactions.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "No activity yet",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: Colors.grey,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      itemCount: recentTransactions.length,
+                      itemBuilder: (context, index) {
+                        final tx = recentTransactions[index];
+                        return _buildTransactionItem(tx);
+                      },
+                    ),
             ),
           ],
         ),
@@ -185,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -194,15 +182,14 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Container(
-            width: 45,
-            height: 45,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: tx.iconBgColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(tx.icon, color: const Color(0xFF00897B), size: 20),
+            child: Icon(tx.icon, color: const Color(0xFF00897B)),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,27 +197,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   tx.title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
                     fontFamily: 'Poppins',
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  tx.timeFormatted,
+                  tx.amount,
                   style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 11,
                     fontFamily: 'Poppins',
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
-            ),
-          ),
-          Text(
-            tx.amount,
-            style: const TextStyle(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
             ),
           ),
         ],

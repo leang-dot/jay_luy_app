@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../data/local_storage.dart';
-import '../state/app_state.dart';
+import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: TextField(
         controller: controller,
         obscureText: isPassword,
+        style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
@@ -74,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const SizedBox(height: 60),
-
               const Text(
                 'Jay Luy',
                 style: TextStyle(
@@ -85,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Container(
@@ -111,18 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       _buildLabel("Email"),
                       _buildInput(_emailController, "example@email.com"),
-
                       const SizedBox(height: 20),
-
                       _buildLabel("Password"),
                       _buildInput(
                         _passwordController,
                         "••••••",
                         isPassword: true,
                       ),
-
                       const SizedBox(height: 30),
-
                       Center(
                         child: SizedBox(
                           width: 160,
@@ -134,6 +128,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   .toLowerCase();
                               final inputPassword = _passwordController.text
                                   .trim();
+
+                              if (inputEmail.isEmpty || inputPassword.isEmpty) {
+                                return;
+                              }
+
                               final existingUser =
                                   await LocalStorage.getUserByEmail(inputEmail);
 
@@ -141,9 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text(
-                                        "Account does not exist. Please sign up.",
-                                      ),
+                                      content: Text("Account does not exist."),
                                     ),
                                   );
                                 }
@@ -151,14 +148,15 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
 
                               if (existingUser.password == inputPassword) {
-                                if (context.mounted) {
-                                  context.read<AppState>().loginUser(
-                                    existingUser,
-                                  );
+                                await LocalStorage.saveUser(existingUser);
 
-                                  Navigator.pushNamedAndRemoveUntil(
+                                if (context.mounted) {
+                                  Navigator.pushAndRemoveUntil(
                                     context,
-                                    '/home',
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          MainScreen(currentUser: existingUser),
+                                    ),
                                     (route) => false,
                                   );
                                 }
@@ -190,9 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

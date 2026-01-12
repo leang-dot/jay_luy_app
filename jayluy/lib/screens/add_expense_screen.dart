@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import '../models/transaction.dart';
-import '../state/app_state.dart';
 
 class CategoryOption {
   final String name;
@@ -13,9 +11,10 @@ class CategoryOption {
 }
 
 class AddExpenseScreen extends StatefulWidget {
-  final VoidCallback? onSave;
+  // NEW: Instead of Provider, we use a required callback function
+  final Function(Transaction) onSave;
 
-  const AddExpenseScreen({super.key, this.onSave});
+  const AddExpenseScreen({super.key, required this.onSave});
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
@@ -29,11 +28,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   DateTime _selectedDate = DateTime.now();
 
-  CategoryOption _selectedCategoryOption = CategoryOption(
-    "Other",
-    Icons.more_horiz,
-    const Color(0xFFEEEEEE),
-  );
+  late CategoryOption _selectedCategoryOption;
 
   final List<CategoryOption> _categories = [
     CategoryOption("Food & Drinks", Icons.restaurant, const Color(0xFFE0F2F1)),
@@ -151,7 +146,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                       size: 18,
                                     ),
                                     const SizedBox(width: 10),
-                                    Text(choice.name),
+                                    Text(
+                                      choice.name,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
                                   ],
                                 ),
                               );
@@ -167,7 +167,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 20),
-
                       _buildLabel("DATE"),
                       _buildInput(
                         controller: _dateController,
@@ -177,7 +176,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         onTap: _presentDatePicker,
                       ),
                       const SizedBox(height: 20),
-
                       _buildLabel("DESCRIPTION"),
                       Container(
                         height: 100,
@@ -193,13 +191,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.all(16),
                             hintText: "Optional details...",
-                            hintStyle: TextStyle(color: Colors.black26),
+                            hintStyle: TextStyle(
+                              color: Colors.black26,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 40),
-
                       Center(
                         child: SizedBox(
                           width: 160,
@@ -211,6 +210,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 return;
                               }
 
+                              // CREATE DATA MODEL
                               final newTx = Transaction(
                                 title: _nameController.text,
                                 amount: "-\$${_amountController.text}",
@@ -218,19 +218,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 iconBgColor: _selectedCategoryOption.color,
                                 date: _selectedDate,
                               );
-                              context.read<AppState>().addTransaction(newTx);
 
-                              _nameController.clear();
-                              _amountController.clear();
-                              _descController.clear();
-
-                              setState(() {
-                                _selectedCategoryOption = _categories[0];
-                                _nameController.text = _categories[0].name;
-                              });
-                              if (widget.onSave != null) {
-                                widget.onSave!();
-                              }
+                              widget.onSave(newTx);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF00897B),
@@ -304,7 +293,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         ),
         hintText: hint,
         hintStyle: const TextStyle(color: Colors.black26),
-
         prefixIcon: prefixIcon != null
             ? Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -322,11 +310,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 ),
               )
             : null,
-
         suffixIcon:
             suffixWidget ??
             (icon != null ? Icon(icon, color: Colors.grey, size: 20) : null),
-
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade200),

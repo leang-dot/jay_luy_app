@@ -8,7 +8,6 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 246, 246, 246),
       body: SafeArea(
-        // FIXED: Added SizedBox with double.infinity to force full width
         child: SizedBox(
           width: double.infinity,
           child: Padding(
@@ -16,7 +15,7 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment:
-                  CrossAxisAlignment.center, // Ensure items are centered
+                  CrossAxisAlignment.center,
               children: [
                 const Spacer(),
 
@@ -33,7 +32,6 @@ class WelcomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // Title
                 const Text(
                   'JAY LUY',
                   style: TextStyle(
@@ -47,7 +45,6 @@ class WelcomeScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                // Button
                 SizedBox(
                   width: 180,
                   height: 50,

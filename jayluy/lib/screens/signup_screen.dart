@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/user.dart';
-import '../state/app_state.dart';
 import '../data/local_storage.dart';
+import 'main_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -101,13 +100,15 @@ class _SignupScreenState extends State<SignupScreen> {
                               );
 
                               await LocalStorage.registerUser(newUser);
+                              await LocalStorage.saveUser(newUser);
 
                               if (context.mounted) {
-                                context.read<AppState>().loginUser(newUser);
-
-                                Navigator.pushNamedAndRemoveUntil(
+                                Navigator.pushAndRemoveUntil(
                                   context,
-                                  '/home',
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        MainScreen(currentUser: newUser),
+                                  ),
                                   (route) => false,
                                 );
                               }
@@ -192,6 +193,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return TextField(
       controller: controller,
       obscureText: isPassword,
+      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
       keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
       decoration: InputDecoration(
         filled: true,
